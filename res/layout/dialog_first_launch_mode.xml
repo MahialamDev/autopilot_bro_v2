@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@drawable/settings_card_bg" android:padding="20.0dp" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4.0dp">
+        <TextView android:textSize="20.0sp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⚡" android:layout_marginEnd="8.0dp" />
+        <TextView android:textSize="17.0sp" android:textStyle="bold" android:textColor="@color/text_primary" android:layout_width="0.0dp" android:layout_height="wrap_content" android:text="Choose Registration Mode" android:layout_weight="1.0" />
+    </LinearLayout>
+    <TextView android:textSize="11.5sp" android:textColor="@color/text_secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16.0dp" android:text="Select how you want to handle Phone Numbers and OTP codes for Facebook account creation:" />
+    <LinearLayout android:orientation="vertical" android:background="@drawable/floating_card_bg" android:padding="14.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12.0dp">
+        <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dp">
+            <TextView android:textSize="13.5sp" android:textStyle="bold" android:textColor="#38bdf8" android:layout_width="0.0dp" android:layout_height="wrap_content" android:text="⚡ Auto Phone &amp; OTP" android:layout_weight="1.0" />
+            <TextView android:textSize="8.5sp" android:textStyle="bold" android:textColor="@color/accent_orange" android:background="@drawable/settings_badge_bg" android:paddingLeft="6.0dp" android:paddingTop="2.0dp" android:paddingRight="6.0dp" android:paddingBottom="2.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="RECOMMENDED" android:paddingHorizontal="6.0dp" android:paddingVertical="2.0dp" />
+        </LinearLayout>
+        <TextView android:textSize="11.0sp" android:textColor="@color/text_primary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12.0dp" android:text="• Auto-fetches virtual numbers &amp; fills registration• 3-Minute live OTP listener with countdown• Floating notification overlay for instant OTP copy• 1-Tap Overlay Permission Setup" android:lineSpacingExtra="3.0dp" />
+        <Button android:textSize="11.5sp" android:textStyle="bold" android:textColor="@color/white" android:id="@id/btnSelectAutoMode" android:background="@drawable/button_primary" android:layout_width="match_parent" android:layout_height="40.0dp" android:text="⚡ Enable Auto Mode &amp; Overlay" />
+    </LinearLayout>
+    <LinearLayout android:orientation="vertical" android:background="@color/surface" android:padding="14.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="14.0dp">
+        <TextView android:textSize="13.5sp" android:textStyle="bold" android:textColor="@color/text_primary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="6.0dp" android:text="📱 Manual Mode" />
+        <TextView android:textSize="11.0sp" android:textColor="@color/text_secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12.0dp" android:text="• Enter phone number and OTP manually• Background auto-phone generator is turned OFF• Floating notification overlay stays disabled" android:lineSpacingExtra="3.0dp" />
+        <Button android:textSize="11.5sp" android:textStyle="bold" android:textColor="@color/text_primary" android:id="@id/btnSelectManualMode" android:background="@drawable/button_dark" android:layout_width="match_parent" android:layout_height="40.0dp" android:text="🚀 Continue with📱 Manual Mode" />
+    </LinearLayout>
+    <TextView android:textSize="9.5sp" android:textColor="@color/text_secondary" android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="💡 You can switch modes anytime from the Settings sidebar." />
+</LinearLayout>

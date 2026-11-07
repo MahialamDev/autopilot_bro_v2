@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/surface" android:padding="20.0dp" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="17.0sp" android:textStyle="bold" android:textColor="@color/text_primary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="14.0dp" android:text="📊 Confirm Push to Google Sheet" />
+    <TextView android:textSize="11.0sp" android:textColor="@color/accent_blue" android:id="@id/dialogTvSheetId" android:background="@color/background" android:padding="8.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12.0dp" android:text="Sheet ID: --" android:singleLine="true" />
+    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dp">
+        <TextView android:textSize="13.0sp" android:textColor="@color/text_secondary" android:layout_width="85.0dp" android:layout_height="wrap_content" android:text="UID (c_user):" />
+        <TextView android:textSize="14.0sp" android:textStyle="bold" android:textColor="@color/accent_green" android:id="@id/dialogTvUid" android:layout_width="0.0dp" android:layout_height="wrap_content" android:text="--" android:layout_weight="1.0" />
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dp">
+        <TextView android:textSize="13.0sp" android:textColor="@color/text_secondary" android:layout_width="85.0dp" android:layout_height="wrap_content" android:text="Password:" />
+        <TextView android:textSize="13.0sp" android:textStyle="bold" android:textColor="@color/accent_orange" android:id="@id/dialogTvPassword" android:layout_width="0.0dp" android:layout_height="wrap_content" android:text="--" android:layout_weight="1.0" />
+    </LinearLayout>
+    <TextView android:textSize="12.0sp" android:textColor="@color/text_secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4.0dp" android:text="Extracted Cookies Preview:" />
+    <ScrollView android:background="@drawable/card_bg" android:padding="8.0dp" android:layout_width="match_parent" android:layout_height="80.0dp" android:layout_marginBottom="18.0dp">
+        <TextView android:textSize="11.0sp" android:textColor="@color/text_secondary" android:id="@id/dialogTvCookies" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="c_user=...; xs=...; datr=...;" />
+    </ScrollView>
+    <LinearLayout android:gravity="end" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <Button android:textSize="12.0sp" android:textColor="@color/text_secondary" android:id="@id/dialogBtnCancel" android:background="@drawable/button_dark" android:paddingLeft="16.0dp" android:paddingRight="16.0dp" android:layout_width="wrap_content" android:layout_height="40.0dp" android:text="Cancel" android:layout_marginEnd="10.0dp" android:paddingHorizontal="16.0dp" />
+        <Button android:textSize="13.0sp" android:textStyle="bold" android:textColor="@color/white" android:id="@id/dialogBtnConfirmPush" android:background="@drawable/button_green" android:paddingLeft="16.0dp" android:paddingRight="16.0dp" android:layout_width="wrap_content" android:layout_height="40.0dp" android:text="Confirm &amp; Push to Sheet" android:paddingHorizontal="16.0dp" />
+    </LinearLayout>
+</LinearLayout>

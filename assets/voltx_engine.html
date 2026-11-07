@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>VoltX Engine</title>
+</head>
+<body>
+<script type="module">
+    import { i as encrypt, n as initWasm, r as decrypt, t as getWasmBytes } from "./mapp-CUnWZkdj.js";
+
+    const API_BASE = "https://api.2oo9.cloud/MXS47FLFX0U/tnevs";
+
+    let state = {
+        email: "",
+        password: "",
+        token: "",
+        range: "38091XXX",
+        currentNumber: "",
+        pollTimer: null,
+        pollCount: 0,
+        isWasmReady: false
+    };
+
+    function log(msg) {
+        console.log("[VoltXEngine] " + msg);
+        if (window.VoltXNative && window.VoltXNative.onLog) {
+            try { window.VoltXNative.onLog(msg); } catch(e) {}
+        }
+    }
+
+    function parseJwtSid(tok) {
+        try {
+            if (!tok) return "M0000000001";
+            const parts = tok.split(".");
+            if (parts.length < 2) return "M0000000001";
+            const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            const json = decodeURIComponent(escape(atob(b64)));
+            const obj = JSON.parse(json);
+            return obj.sid || "M0000000001";
+        } catch(e) {
+            return "M0000000001";
+        }
+    }
+
+    async function callApi(endpoint, method, tok, payloadObj) {
+        const sid = parseJwtSid(tok);
+        let body = undefined;
+        if (payloadObj !== undefined && payloadObj !== null) {
+            body = encrypt(JSON.stringify(payloadObj), sid);
+        }
+
+        const headers = {
+            "content-type": "text/plain; charset=utf-8",
+            "origin": "https://voltxsms.com",
+            "referer": "https://voltxsms.com/"
+        };
+        if (tok) {
+            headers["mauth"] = tok;
+        }
+
+        const fullUrl = `${API_BASE}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+        const res = await fetch(fullUrl, {
+            method: method || "GET",
+            headers: headers,
+            body: body
+        });
+
+        const encRes = await res.text();
+        try {
+            const dec = decrypt(encRes, sid);
+            return JSON.parse(dec);
+        } catch(err) {
+            try {
+                const dec2 = decrypt(encRes, "M0000000001");
+                return JSON.parse(dec2);
+            } catch(e) {
+                return { meta: { code: res.status, status: "raw" }, raw: encRes };
+            }
+        }
+    }
+
+    function extractOtp(text) {
+        if (!text) return "";
+        const fbMatch = text.match(/(?:FB-|Facebook:?\s*(?:Your\s*code\s*is\s*)?|code\s*is\s*|c\xF3digo\s*de\s*Facebook\s*es\s*|kod\s*Facebook\s*to\s*)(\d{4,8})/i);
+        if (fbMatch) return fbMatch[1];
+        const m = text.match(/\b(\d{4,8})\b/);
+        return m ? m[1] : "";
+    }
+
+    async function performLogin(email, password, silent) {
+        if (!email || !password) {
+            log("❌ Login failed: Email or password missing.");
+            if (window.VoltXNative && window.VoltXNative.onLoginFailed) {
+                window.VoltXNative.onLoginFailed("Email or password missing");
+            }
+            return false;
+        }
+        log(`🔐 Logging in as ${email}...`);
+        try {
+            const res = await callApi("@auth/login", "POST", "", {
+                email: email,
+                password: password,
+                remember: true
+            });
+            const code = (res.meta && res.meta.code) || 0;
+            if (code === 200 && res.data && res.data.session_token) {
+                state.token = res.data.session_token;
+                state.email = email;
+                state.password = password;
+                log("🎉 Login successful! Session token obtained.");
+                if (window.VoltXNative && window.VoltXNative.onLoginSuccess) {
+                    window.VoltXNative.onLoginSuccess(state.token, silent);
+                }
+                return true;
+            } else {
+                const msg = res.message || "Invalid credentials or login failed";
+                log(`❌ Login error: ${msg} (code ${code})`);
+                if (window.VoltXNative && window.VoltXNative.onLoginFailed) {
+                    window.VoltXNative.onLoginFailed(msg);
+                }
+                return false;
+            }
+        } catch(e) {
+            log(`❌ Login exception: ${e.message}`);
+            if (window.VoltXNative && window.VoltXNative.onLoginFailed) {
+                window.VoltXNative.onLoginFailed(e.message);
+            }
+            return false;
+        }
+    }
+
+    function formatRange(rawRange) {
+        if (!rawRange) return "38091XXX";
+        const digits = rawRange.replace(/\D/g, "");
+        if (!digits) return "38091XXX";
+        return digits + "XXX";
+    }
+
+    async function requestNumber(range, retryCount = 0) {
+        const cleanRange = formatRange(range || state.range);
+        log(`🚀 Requesting number for range '${cleanRange}'...`);
+
+        if (!state.token && state.email && state.password) {
+            const loggedIn = await performLogin(state.email, state.password, true);
+            if (!loggedIn) {
+                if (window.VoltXNative && window.VoltXNative.onNumberError) {
+                    window.VoltXNative.onNumberError("Could not log in to VoltXSms");
+                }
+                return;
+            }
+        }
+
+        try {
+            const resp = await callApi("@dashboard/dialer/getnum/request", "POST", state.token, { range: cleanRange });
+            const meta = resp.meta || {};
+            const code = meta.code || 0;
+
+            if (code === 401 || meta.status === "unauthorized" || code === 2941) {
+                if (retryCount < 1 && state.email && state.password) {
+                    log("🔄 Token expired! Auto re-logging in...");
+                    const ok = await performLogin(state.email, state.password, true);
+                    if (ok) {
+                        return await requestNumber(range, retryCount + 1);
+                    }
+                }
+                if (window.VoltXNative && window.VoltXNative.onNumberError) {
+                    window.VoltXNative.onNumberError("VoltX Session Expired. Please check login.");
+                }
+                return;
+            }
+
+            if (code === 200 || meta.status === "ok") {
+                // Fetch list to find the allocated number
+                await new Promise(r => setTimeout(r, 600));
+                const listResp = await callApi("@dashboard/dialer/getnum/list?page=1", "GET", state.token, null);
+                const numbers = (listResp.data && listResp.data.numbers) || [];
+
+                if (numbers.length > 0) {
+                    const latest = numbers[0];
+                    let num = String(latest.number || "");
+                    if (!num.startsWith("+")) num = "+" + num;
+                    const country = latest.country || "Unknown";
+                    const operator = latest.operator || "Unknown";
+
+                    state.currentNumber = num;
+                    log(`✅ Number Allocated: ${num} (${country}, ${operator})`);
+
+                    if (window.VoltXNative && window.VoltXNative.onNumberAllocated) {
+                        window.VoltXNative.onNumberAllocated(num, country, operator);
+                    }
+
+                    // Auto-start polling for OTP
+                    startPolling(num);
+                } else {
+                    log("⚠️ Request succeeded, but list is temporarily empty.");
+                    if (window.VoltXNative && window.VoltXNative.onNumberError) {
+                        window.VoltXNative.onNumberError("No number returned in list");
+                    }
+                }
+            } else {
+                const msg = resp.message || "Failed to allocate number";
+                log(`❌ Allocation error: ${msg} (code: ${code})`);
+                if (window.VoltXNative && window.VoltXNative.onNumberError) {
+                    window.VoltXNative.onNumberError(msg);
+                }
+            }
+        } catch(e) {
+            log(`❌ Request number exception: ${e.message}`);
+            if (window.VoltXNative && window.VoltXNative.onNumberError) {
+                window.VoltXNative.onNumberError(e.message);
+            }
+        }
+    }
+
+    function startPolling(targetNum) {
+        stopPolling();
+        state.currentNumber = targetNum || state.currentNumber;
+        state.pollCount = 0;
+        log(`⏳ Started OTP polling for ${state.currentNumber}...`);
+
+        const cleanTarget = state.currentNumber.replace(/\D/g, "");
+
+        state.pollTimer = setInterval(async () => {
+            state.pollCount++;
+            try {
+                if (window.VoltXNative && window.VoltXNative.onOtpPollingStatus) {
+                    window.VoltXNative.onOtpPollingStatus(`Waiting for SMS... (${state.pollCount * 2}s)`);
+                }
+
+                const listResp = await callApi("@dashboard/dialer/getnum/list?page=1", "GET", state.token, null);
+                const numbers = (listResp.data && listResp.data.numbers) || [];
+
+                let foundOtps = [];
+                for (let item of numbers) {
+                    const itemNum = String(item.number || "").replace(/\D/g, "");
+                    if (itemNum === cleanTarget || cleanTarget.endsWith(itemNum) || itemNum.endsWith(cleanTarget)) {
+                        let otp = item.code ? String(item.code).trim() : "";
+                        const message = item.message || "";
+                        if (!otp && message) {
+                            otp = extractOtp(message);
+                        }
+                        if (otp) {
+                            foundOtps.push({ otp: otp, message: message });
+                        }
+                    }
+                }
+
+                if (foundOtps.length > 0) {
+                    // Latest OTP is the first or most recent
+                    const primary = foundOtps[0];
+                    // If multiple OTPs or messages exist, format combined message summary
+                    let allCodes = foundOtps.map(o => o.otp).join(", ");
+                    let combinedMsg = foundOtps.map(o => o.otp + (o.message ? " (" + o.message + ")" : "")).join(" | ");
+                    log(`🔑 OTP Received: ${allCodes} (All: ${combinedMsg})`);
+                    stopPolling();
+                    if (window.VoltXNative && window.VoltXNative.onOtpReceived) {
+                        window.VoltXNative.onOtpReceived(primary.otp, combinedMsg);
+                    }
+                    return;
+                }
+
+                // Stop after 5 minutes (150 polls * 2s = 300s)
+                if (state.pollCount >= 150) {
+                    log("⏰ OTP polling timed out (5 minutes).");
+                    stopPolling();
+                    if (window.VoltXNative && window.VoltXNative.onOtpPollingStatus) {
+                        window.VoltXNative.onOtpPollingStatus("OTP Timed Out");
+                    }
+                }
+            } catch(e) {
+                log(`⚠️ Poll tick error: ${e.message}`);
+            }
+        }, 2000);
+    }
+
+    function stopPolling() {
+        if (state.pollTimer) {
+            clearInterval(state.pollTimer);
+            state.pollTimer = null;
+        }
+    }
+
+    async function fetchConsoleInfo() {
+        if (!state.token && state.email && state.password) {
+            await performLogin(state.email, state.password, true);
+        }
+        if (!state.token) return;
+        try {
+            const resp = await callApi("@dashboard/dialer/console/info", "GET", state.token, null);
+            if (resp && resp.data) {
+                if (window.VoltXNative && window.VoltXNative.onConsoleInfoReceived) {
+                    window.VoltXNative.onConsoleInfoReceived(JSON.stringify(resp.data));
+                }
+            }
+        } catch(e) {
+            log("❌ Console fetch error: " + e.message);
+        }
+    }
+
+    // Public interface on window.VoltX
+    window.VoltX = {
+        setCredentials: function(email, password, token, range) {
+            state.email = email || state.email;
+            state.password = password || state.password;
+            if (token) state.token = token;
+            if (range) state.range = range;
+            log("Credentials updated in engine.");
+        },
+        login: performLogin,
+        requestNumber: requestNumber,
+        startPolling: startPolling,
+        stopPolling: stopPolling,
+        fetchConsoleInfo: fetchConsoleInfo,
+        encrypt: function(text, sid) { return encrypt(text, sid || parseJwtSid(state.token)); },
+        decrypt: function(text, sid) { return decrypt(text, sid || parseJwtSid(state.token)); }
+    };
+
+    // Initialize WASM
+    (async function init() {
+        try {
+            await initWasm({ module_or_path: getWasmBytes() });
+            state.isWasmReady = true;
+            log("✅ VoltX Wasm Initialized and Ready!");
+            if (window.VoltXNative && window.VoltXNative.onWasmReady) {
+                window.VoltXNative.onWasmReady();
+            }
+            setTimeout(fetchConsoleInfo, 2500);
+            setInterval(fetchConsoleInfo, 7000);
+        } catch(e) {
+            log("❌ Wasm init failed: " + e.message);
+        }
+    })();
+</script>
+</body>
+</html>

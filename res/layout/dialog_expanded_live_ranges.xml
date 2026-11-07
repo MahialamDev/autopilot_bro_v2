@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/drawer_bg" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:background="#131d31" android:paddingLeft="14.0dp" android:paddingTop="12.0dp" android:paddingRight="14.0dp" android:paddingBottom="12.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="14.0dp" android:paddingVertical="12.0dp">
+        <TextView android:textSize="18.0sp" android:textStyle="bold" android:textColor="@color/white" android:id="@id/btnBackExpandRanges" android:padding="4.0dp" android:focusable="true" android:clickable="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="←" android:layout_marginEnd="10.0dp" />
+        <LinearLayout android:orientation="vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0">
+            <TextView android:textSize="14.0sp" android:textStyle="bold" android:textColor="@color/accent_green" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📡 Live FB OTP Ranges (Full View)" />
+            <TextView android:textSize="10.0sp" android:textColor="@color/text_secondary" android:id="@id/tvExpandSubTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Real-time hits with every phone number and OTP code" />
+        </LinearLayout>
+        <TextView android:textSize="10.0sp" android:textStyle="bold" android:textColor="@color/white" android:id="@id/btnRefreshExpandRanges" android:background="@drawable/button_primary" android:paddingLeft="10.0dp" android:paddingTop="5.0dp" android:paddingRight="10.0dp" android:paddingBottom="5.0dp" android:focusable="true" android:clickable="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🔄 Refresh" android:paddingHorizontal="10.0dp" android:paddingVertical="5.0dp" />
+    </LinearLayout>
+    <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:background="#0f172a" android:paddingLeft="12.0dp" android:paddingTop="8.0dp" android:paddingRight="12.0dp" android:paddingBottom="8.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="12.0dp" android:paddingVertical="8.0dp">
+        <EditText android:textSize="11.0sp" android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" android:id="@id/etSearchExpandRanges" android:background="@drawable/settings_input_bg" android:paddingLeft="10.0dp" android:paddingRight="10.0dp" android:layout_width="0.0dp" android:layout_height="34.0dp" android:hint="🔍 Search Range, Country, or Number..." android:singleLine="true" android:layout_weight="1.0" android:paddingHorizontal="10.0dp" />
+        <TextView android:textSize="10.0sp" android:textStyle="bold" android:textColor="@color/accent_blue" android:id="@id/tvExpandTotalHitsBadge" android:background="@drawable/button_dark" android:paddingLeft="8.0dp" android:paddingTop="4.0dp" android:paddingRight="8.0dp" android:paddingBottom="4.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⚡ 0 Ranges" android:layout_marginStart="8.0dp" android:paddingHorizontal="8.0dp" android:paddingVertical="4.0dp" />
+    </LinearLayout>
+    <ScrollView android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="0.0dp" android:fillViewport="true" android:layout_weight="1.0">
+        <LinearLayout android:orientation="vertical" android:id="@id/layoutExpandRangesContainer" android:padding="10.0dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textSize="12.0sp" android:textColor="@color/text_secondary" android:gravity="center" android:id="@id/tvExpandLoading" android:padding="20.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="⏳ Loading real-time OTP ranges..." />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
